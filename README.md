@@ -1,47 +1,143 @@
-# Adj Noun Wordlist Generator 
-This is a small program written in C++ that will output all possible combinations of adjectives, nouns and digits in the format...<br>
+# Adj Noun Wordlist Generator
 
-`adjective + noun + 1 digit`<br>
-`adjective + noun + 3 digits`
+Gerador de wordlists que combina adjetivos + substantivos + dígitos com suporte a leet speak e variações mistas.
 
-By using the -0, -1, -2, or -3 parameters you can control exactly how many digits you want appended.<br>
-(by default only 1 and 3 digits are appended)<br>
+## Compilar
 
-To compile on Windows (requires the <a href="http://www.microsoft.com/en-us/download/details.aspx?id=8279">Windows 7 SDK</a>):<br>
-`cl /EHsc adj.cpp`
+**Linux:**
+```bash
+g++ adj.cpp -oadj -std=c++11
+```
 
-To compile on Linux:<br>
-`g++ adj.cpp -oadj`
+**Windows:**
+```bash
+cl /EHsc adj.cpp
+```
 
-##Example usage:
-`adj | oclHashcat64 -m 2500 CAP.hccap`<br>
-pipes its output into <a href="http://hashcat.net/oclhashcat/">oclHashcat</a> (AMD)
+## Parâmetros
 
-`adj | cudaHashcat64 -m 2500 CAP.hccap`<br>
-pipes its output into <a href="http://hashcat.net/oclhashcat/">cudaHashcat</a> (NVIDIA)
+### Controle de dígitos
+| Param | Descrição | Exemplo |
+|-------|-----------|---------|
+| `-0` | só adj+sub | `fluffydog` |
+| `-1` | +1 dígito | `fluffydog0` |
+| `-2` | +2 dígitos | `fluffydog00` |
+| `-3` | +3 dígitos | `fluffydog000` |
 
-`adj | aircrack-ng -w - CAP.cap -e SSID`<br>
-pipes its output into <a href="http://www.aircrack-ng.org/">aircrack-ng</a>
+### Palavras customizadas
+| Param | Descrição | Exemplo |
+|-------|-----------|---------|
+| `-a palavra` | define a palavra 1 | `-a fluffy` |
+| `-s palavra` | define a palavra 2 | `-s dog` |
 
-`./adj | pyrit -r CAP.cap -i- attack_passthrough`<br>
-pipes its output into <a href="https://code.google.com/p/pyrit/">pyrit</a>
+### Modificadores
+| Param | Descrição | Exemplo |
+|-------|-----------|---------|
+| `-at` | adiciona `@` entre elas | `fluffy@dog` |
+| `-leet` | leet speak completo | `flu77yd09` |
+| `-mix` | variações mistas (leet + maiúsculas) | `Flu77yDo9` |
+| `-full` | usa lista completa (968 adj + 1844 nouns) | todas as combinações |
 
-## Parameters
-`-0`<br>
-Will output (adjective)+(noun) only<br>
+### Separador personalizado
 
-`-1`<br>
-Will output (adjective)+(noun)+(1 digit) only<br>
+O separador padrão é `@`. Para mudar, edite a **linha 85** do `adj.cpp`:
 
-`-2`<br>
-Will output (adjective)+(noun)+(2 digits) only<br>
+```cpp
+std::string sep = use_at ? "@" : "";
+```
 
-`-3`<br>
-Will output (adjective)+(noun)+(3 digits) only<br>
+Altere `"@"` para o caractere que preferir, como `"#"`, `"-"`, `"_"`, etc.
 
-`-full`<br>
-Uses a more comprehensive set of words.
+### Salvar em .txt
+```bash
+./adj -a fluffy -s dog -0 -at -leet -mix > wordlist.txt
+```
 
-By default a set of 153 adjectives and 136 nouns are used (approx. 21,016,080 combinations ~ 321MB).
+## Exemplos de uso
 
-If you use the -full switch 968 adjectives and 1,844 nouns are used (approx. 1,802,841,920 combinations ~ 27.5GB).
+### Combinar palavras customizadas
+```bash
+./adj -a fluffy -s dog -0 -at -leet -mix
+```
+Resultado:
+```
+fluffy@dog
+flu77yd09
+Flu77yDo9
+flu77y@D0g
+...
+```
+
+### Com 3 dígitos
+```bash
+./adj -a fluffy -s dog -3 -at -leet -mix > wordlist.txt
+```
+
+### Usar listas internas
+```bash
+./adj -0 -at -leet
+```
+
+### Lista completa
+```bash
+./adj -0 -full -at -leet > wordlist_full.txt
+```
+
+## Tabela leet speak
+
+| Caractere | Número |
+|-----------|--------|
+| a | 4 |
+| e | 3 |
+| i | 1 |
+| o | 0 |
+| s | 5 |
+| t | 7 |
+| g | 9 |
+| b | 8 |
+
+## Uso com ferramentas
+
+```bash
+# hashcat
+./adj -a fluffy -s dog -0 -at -leet -mix | hashcat -m 2500 CAP.hccap
+
+# aircrack-ng
+./adj -a fluffy -s dog -0 -at -leet -mix | aircrack-ng -w - CAP.cap -e SSID
+
+# pyrit
+./adj -a fluffy -s dog -0 -at -leet -mix | pyrit -r CAP.cap -i- attack_passthrough
+```
+
+## Exemplos de variações geradas
+
+### Com `-0` (sem dígitos)
+```bash
+./adj -a fluffy -s dog -0 -at -mix
+```
+| Tipo | Exemplo |
+|------|---------|
+| Original | `fluffy@dog` |
+| Leet | `flu77yd09` |
+| Mix | `Flu77yDo9` |
+| Invertido | `dog@fluffy` |
+
+### Com `-1` (+1 dígito)
+```bash
+./adj -a fluffy -s dog -1 -at -mix
+```
+| Tipo | Exemplo |
+|------|---------|
+| Original | `fluffy@dog0` |
+| Leet | `flu77yd090` |
+| Mix | `Flu77yDo90` |
+
+### Com `-3` (+3 dígitos)
+```bash
+./adj -a fluffy -s dog -3 -at -mix
+```
+| Tipo | Exemplo |
+|------|---------|
+| Original | `fluffy@dog000` |
+| Leet | `flu77yd09000` |
+| Mix | `Flu77yDo9000` |

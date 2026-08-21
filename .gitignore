@@ -1,0 +1,10 @@
+# Compiled binary
+adj
+adj.exe
+
+# Wordlist files
+*.txt
+
+# Build artifacts
+*.o
+*.obj
